@@ -1,0 +1,10 @@
+[project]
+name = "clan-wars-payouts"
+version = "0.1.0"
+description = "WoT clan wars attendance and weekly gold/bonds payout tracker"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi",
+    "sqlalchemy>=2.0.50",
+    "uvicorn[standard]",
+]
