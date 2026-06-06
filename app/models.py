@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import BigInteger, DateTime, ForeignKey, String, func
+from sqlalchemy import BigInteger, CheckConstraint, DateTime, ForeignKey, String, func
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 
@@ -19,6 +19,12 @@ class Clan(Base):
 
 class User(Base):
     __tablename__ = "users"
+    __table_args__ = (
+        CheckConstraint(
+            "(clan_id IS NULL) = (clan_role IS NULL)",
+            name="ck_users_clan_id_role_consistent",
+        ),
+    )
 
     id: Mapped[int] = mapped_column(primary_key=True)
     wg_account_id: Mapped[int] = mapped_column(BigInteger, unique=True, index=True)

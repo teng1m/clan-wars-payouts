@@ -13,7 +13,8 @@ from starlette.middleware.sessions import SessionMiddleware
 
 from app.config import BASE_URL, SECRET_KEY, WG_APPLICATION_ID
 from app.db import engine, get_db
-from app.models import Base, User
+from app.models import Base, Clan, User
+from app.wargaming import get_clan_info, get_clan_membership
 
 TEMPLATES_DIR = Path(__file__).parent / "templates"
 templates = Jinja2Templates(directory=TEMPLATES_DIR)
@@ -65,6 +66,24 @@ def auth_callback(nickname, account_id, request: Request, db: Session = Depends(
     else:
         existing.nickname = nickname
         user = existing
+
+    membership = get_clan_membership(account_id)
+    if membership is None:
+        user.clan_id = None
+        user.clan_role = None
+    else:
+        clan = db.execute(select(Clan).where(Clan.wg_clan_id == membership["clan_id"])).scalar_one_or_none()
+
+        if clan is None:
+            clan_info = get_clan_info(membership["clan_id"])
+            new_clan = Clan(wg_clan_id=membership["clan_id"], tag=clan_info["tag"], name=clan_info["name"])
+            db.add(new_clan)
+            db.flush()
+            clan = new_clan
+
+        user.clan_id = clan.id
+        user.clan_role = membership["role"]
+
     db.commit()
     db.refresh(user)
 
