@@ -1,4 +1,3 @@
-import random
 import secrets
 from contextlib import asynccontextmanager
 from datetime import date, datetime, time, timedelta
@@ -192,12 +191,6 @@ def logout(request: Request) -> RedirectResponse:
     return RedirectResponse(url="/", status_code=303)
 
 
-@app.get("/debug/users")
-def list_users(db: Session = Depends(get_db)):
-    users = db.execute(select(User).order_by(User.id)).scalars().all()
-    return [{"id": u.id, "wg_account_id": u.wg_account_id, "nickname": u.nickname} for u in users]
-
-
 @app.get("/auth/callback")
 def auth_callback(
     request: Request,
@@ -255,15 +248,3 @@ def login() -> RedirectResponse:
     url = f"https://api.worldoftanks.com/wot/auth/login/?{urlencode(args)}"
 
     return RedirectResponse(url, status_code=302)
-
-
-@app.get("/debug/seed")
-def seed_user(db: Session = Depends(get_db)):
-    user = User(
-        wg_account_id=random.randint(1_000_000, 100_000_000),
-        nickname=f"test_user_{random.randint(1000, 9999)}",
-    )
-    db.add(user)
-    db.commit()
-    db.refresh(user)
-    return {"id": user.id, "wg_account_id": user.wg_account_id, "nickname": user.nickname}
