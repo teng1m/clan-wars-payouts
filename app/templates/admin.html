@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Admin — Clan Wars Payouts</title>
+        <link rel="stylesheet" href="/static/style.css" />
+    </head>
+    <body>
+        <main>
+            {% if forbidden %}
+            <h1>Forbidden</h1>
+            <p>{{ forbidden }}</p>
+            {% else %}
+            <h1>Admin</h1>
+            <p>
+                Hello {{ user.clan_role.replace("_", " ").title() }}
+                <strong>{{ user.nickname }}</strong>, your clan is
+                <strong>[{{ user.clan.tag }}]</strong> {{ user.clan.name }}.
+            </p>
+            {% endif %}
+            <p><a href="/">&larr; Back home</a></p>
+        </main>
+    </body>
+</html>

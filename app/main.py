@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 from urllib.parse import urlencode
 
-from fastapi import Depends, FastAPI, Request
+from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.responses import FileResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -13,6 +13,7 @@ from starlette.middleware.sessions import SessionMiddleware
 
 from app.config import BASE_URL, SECRET_KEY, WG_APPLICATION_ID
 from app.db import engine, get_db
+from app.deps import ADMIN_ROLES, require_admin
 from app.models import Base, Clan, User
 from app.wargaming import get_clan_info, get_clan_membership
 
@@ -33,6 +34,16 @@ STATIC_DIR = Path(__file__).parent / "static"
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 
+@app.exception_handler(403)
+def forbidden(request: Request, exc: HTTPException):
+    return templates.TemplateResponse(
+        request=request,
+        name="admin.html",
+        context={"forbidden": exc.detail},
+        status_code=403,
+    )
+
+
 @app.get("/", include_in_schema=False)
 def home(request: Request, db: Session = Depends(get_db)):
     user_id = request.session.get("user_id")
@@ -40,6 +51,15 @@ def home(request: Request, db: Session = Depends(get_db)):
     return templates.TemplateResponse(
         request=request,
         name="index.html",
+        context={"user": user, "admin_roles": ADMIN_ROLES},
+    )
+
+
+@app.get("/admin", include_in_schema=False)
+def admin(request: Request, user: User = Depends(require_admin)):
+    return templates.TemplateResponse(
+        request=request,
+        name="admin.html",
         context={"user": user},
     )
 
