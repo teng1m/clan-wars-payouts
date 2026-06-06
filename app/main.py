@@ -4,9 +4,8 @@ from contextlib import asynccontextmanager
 from datetime import date, datetime, time, timedelta
 from pathlib import Path
 from urllib.parse import urlencode
-from zoneinfo import ZoneInfo
 
-from fastapi import Depends, FastAPI, HTTPException, Request
+from fastapi import Depends, FastAPI, Form, HTTPException, Request
 from fastapi.responses import FileResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -17,11 +16,17 @@ from starlette.middleware.sessions import SessionMiddleware
 
 from app.config import BASE_URL, SECRET_KEY, WG_APPLICATION_ID
 from app.db import engine, get_db
-from app.deps import ADMIN_ROLES, get_current_user, require_admin
-from app.models import AttendanceCode, Base, Clan, User
+from app.deps import (
+    ADMIN_ROLES,
+    CLAN_TZ,
+    checked_in_today,
+    get_current_user,
+    require_admin,
+    require_user,
+)
+from app.models import Attendance, AttendanceCode, Base, Clan, User
 from app.wargaming import get_clan_info, get_clan_membership
 
-CLAN_TZ = ZoneInfo("America/New_York")
 RESET_HOUR = 7
 CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
 
@@ -32,9 +37,7 @@ def generate_code(length: int = 6) -> str:
 
 def expiry_for(attendance_date: date) -> datetime:
     # a day's code is valid until the next daily reset after its attendance date
-    return datetime.combine(
-        attendance_date + timedelta(days=1), time(hour=RESET_HOUR), tzinfo=CLAN_TZ
-    )
+    return datetime.combine(attendance_date + timedelta(days=1), time(hour=RESET_HOUR), tzinfo=CLAN_TZ)
 
 
 def get_or_create_todays_code(db: Session, clan_id: int) -> AttendanceCode:
@@ -61,6 +64,7 @@ def get_or_create_todays_code(db: Session, clan_id: int) -> AttendanceCode:
         db.rollback()
         code = db.execute(stmt).scalar_one()
     return code
+
 
 TEMPLATES_DIR = Path(__file__).parent / "templates"
 templates = Jinja2Templates(directory=TEMPLATES_DIR)
@@ -90,11 +94,22 @@ def forbidden(request: Request, exc: HTTPException):
 
 
 @app.get("/", include_in_schema=False)
-def home(request: Request, user: User | None = Depends(get_current_user)):
+def home(
+    request: Request,
+    code: str = "",
+    user: User | None = Depends(get_current_user),
+    checked_in: bool = Depends(checked_in_today),
+):
     return templates.TemplateResponse(
         request=request,
         name="index.html",
-        context={"user": user, "admin_roles": ADMIN_ROLES},
+        context={
+            "user": user,
+            "admin_roles": ADMIN_ROLES,
+            "checked_in": checked_in,
+            "code": code,
+            "error": None,
+        },
     )
 
 
@@ -109,6 +124,60 @@ def admin(
         request=request,
         name="admin.html",
         context={"user": user, "code": code},
+    )
+
+
+@app.post("/", include_in_schema=False)
+def check_in(
+    request: Request,
+    code: str = Form(...),
+    user: User = Depends(require_user),
+    db: Session = Depends(get_db),
+):
+    submitted = code.strip().upper()
+    today = datetime.now(CLAN_TZ).date()
+
+    error = None
+    if user.clan_id is None:
+        error = "You're not in a clan."
+    else:
+        matched = db.execute(
+            select(AttendanceCode).where(
+                AttendanceCode.clan_id == user.clan_id,
+                AttendanceCode.attendance_date == today,
+                AttendanceCode.code == submitted,
+            )
+        ).scalar_one_or_none()
+
+        if matched is None:
+            error = "That code isn't valid for today."
+        else:
+            db.add(
+                Attendance(
+                    clan_id=user.clan_id,
+                    user_id=user.id,
+                    attendance_date=today,
+                    code_id=matched.id,
+                )
+            )
+            try:
+                db.commit()
+            except IntegrityError:
+                db.rollback()  # already checked in today — home will show that
+            return RedirectResponse("/", status_code=303)
+
+    # bad submission: nothing was written, so re-render home with the error inline
+    return templates.TemplateResponse(
+        request=request,
+        name="index.html",
+        context={
+            "user": user,
+            "admin_roles": ADMIN_ROLES,
+            "checked_in": False,
+            "code": submitted,
+            "error": error,
+        },
+        status_code=400,
     )
 
 

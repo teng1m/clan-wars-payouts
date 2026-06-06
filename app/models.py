@@ -59,3 +59,28 @@ class AttendanceCode(Base):
     code: Mapped[str] = mapped_column(String(6))
     attendance_date: Mapped[date] = mapped_column(Date)
     expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class Attendance(Base):
+    __tablename__ = "attendance"
+    __table_args__ = (
+        UniqueConstraint(
+            "clan_id", "user_id", "attendance_date", name="uq_attendance_clan_user_date"
+        ),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    clan_id: Mapped[int] = mapped_column(ForeignKey("clans.id"), index=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+    attendance_date: Mapped[date] = mapped_column(Date)
+    # self check-in: code_id set, overridden_by_id null.
+    # admin override: overridden_by_id set, code_id null.
+    code_id: Mapped[int | None] = mapped_column(
+        ForeignKey("attendance_codes.id"), nullable=True
+    )
+    overridden_by_id: Mapped[int | None] = mapped_column(
+        ForeignKey("users.id"), nullable=True
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )

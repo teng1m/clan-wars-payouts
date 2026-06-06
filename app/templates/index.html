@@ -20,13 +20,27 @@
             <p><a href="/admin">Go to Admin</a></p>
             {% endif %}
 
-            <form action="/attendance/enter" method="post">
+            {% if checked_in %}
+            <p>You've attended clan wars today. Thanks for playing!</p>
+            {% else %}
+            {% if error %}
+            <p class="error">{{ error }}</p>
+            {% endif %}
+            <form action="/" method="post">
                 <label>
                     Today's code:
-                    <input type="text" name="code" maxlength="6" required autocomplete="off" />
+                    <input
+                        type="text"
+                        name="code"
+                        maxlength="6"
+                        required
+                        autocomplete="off"
+                        value="{{ code }}"
+                    />
                 </label>
                 <button type="submit">Submit</button>
             </form>
+            {% endif %}
             {% else %}
             <p>You're not part of a clan!</p>
             {% endif %}
