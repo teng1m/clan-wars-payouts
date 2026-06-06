@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Clan Wars Payouts</title>
+        <link rel="stylesheet" href="/static/style.css" />
+    </head>
+    <body>
+        <main>
+            <h1>Clan Wars Payouts</h1>
+
+            {% if user %}
+            <p>Hello, <strong>{{ user.nickname }}</strong>.</p>
+            <form action="/logout" method="post">
+                <button type="submit">Log out</button>
+            </form>
+            {% else %}
+            <p><a href="/login">Click to log in with Wargaming</a></p>
+            {% endif %}
+
+            <p id="js-check">If you see this, JS hasn't loaded yet.</p>
+        </main>
+        <script src="/static/app.js"></script>
+    </body>
+</html>
