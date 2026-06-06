@@ -13,6 +13,8 @@
             {% if user %}
             <p>Hello, <strong>{{ user.nickname }}</strong>.</p>
             <p>Today is <span id="today"></span>.</p>
+            {% if user.clan %}
+            <p>You're a member of <strong>[{{ user.clan.tag }}]</strong> {{ user.clan.name }}.</p>
 
             <form action="/attendance/enter" method="post">
                 <label>
@@ -21,6 +23,9 @@
                 </label>
                 <button type="submit">Submit</button>
             </form>
+            {% else %}
+            <p>You're not part of a clan!</p>
+            {% endif %}
 
             <form action="/logout" method="post">
                 <button type="submit">Log out</button>
