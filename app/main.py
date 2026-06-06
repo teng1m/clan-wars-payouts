@@ -14,7 +14,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 from starlette.middleware.sessions import SessionMiddleware
 
-from .config import BASE_URL, SECRET_KEY, WG_APPLICATION_ID
+from .config import BASE_URL, SECRET_KEY, SECURE_COOKIES, WG_APPLICATION_ID
 from .db import engine, get_db
 from .deps import (
     ADMIN_ROLES,
@@ -77,7 +77,12 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
-app.add_middleware(SessionMiddleware, secret_key=SECRET_KEY)
+app.add_middleware(
+    SessionMiddleware,
+    secret_key=SECRET_KEY,
+    https_only=SECURE_COOKIES,
+    same_site="lax",
+)
 
 STATIC_DIR = Path(__file__).parent / "static"
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
