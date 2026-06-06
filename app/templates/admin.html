@@ -18,6 +18,9 @@
                 <strong>{{ user.nickname }}</strong>, your clan is
                 <strong>[{{ user.clan.tag }}]</strong> {{ user.clan.name }}.
             </p>
+            <p>Today's attendance code:</p>
+            <p><code style="font-size: 2rem; letter-spacing: 0.3rem;">{{ code.code }}</code></p>
+            <p>Valid until {{ code.expires_at.strftime("%b %-d, %-I:%M %p %Z") }}.</p>
             {% endif %}
             <p><a href="/">&larr; Back home</a></p>
         </main>

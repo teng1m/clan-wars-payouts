@@ -1,6 +1,15 @@
-from datetime import datetime
+from datetime import date, datetime
 
-from sqlalchemy import BigInteger, CheckConstraint, DateTime, ForeignKey, String, func
+from sqlalchemy import (
+    BigInteger,
+    CheckConstraint,
+    Date,
+    DateTime,
+    ForeignKey,
+    String,
+    UniqueConstraint,
+    func,
+)
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 
@@ -35,3 +44,18 @@ class User(Base):
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )
+
+
+class AttendanceCode(Base):
+    __tablename__ = "attendance_codes"
+    __table_args__ = (
+        UniqueConstraint(
+            "clan_id", "attendance_date", name="uq_attendance_codes_clan_date"
+        ),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    clan_id: Mapped[int] = mapped_column(ForeignKey("clans.id"), index=True)
+    code: Mapped[str] = mapped_column(String(6))
+    attendance_date: Mapped[date] = mapped_column(Date)
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))

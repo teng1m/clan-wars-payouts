@@ -1,21 +1,66 @@
 import random
+import secrets
 from contextlib import asynccontextmanager
+from datetime import date, datetime, time, timedelta
 from pathlib import Path
 from urllib.parse import urlencode
+from zoneinfo import ZoneInfo
 
 from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.responses import FileResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 from starlette.middleware.sessions import SessionMiddleware
 
 from app.config import BASE_URL, SECRET_KEY, WG_APPLICATION_ID
 from app.db import engine, get_db
 from app.deps import ADMIN_ROLES, get_current_user, require_admin
-from app.models import Base, Clan, User
+from app.models import AttendanceCode, Base, Clan, User
 from app.wargaming import get_clan_info, get_clan_membership
+
+CLAN_TZ = ZoneInfo("America/New_York")
+RESET_HOUR = 7
+CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
+
+
+def generate_code(length: int = 6) -> str:
+    return "".join(secrets.choice(CODE_ALPHABET) for _ in range(length))
+
+
+def expiry_for(attendance_date: date) -> datetime:
+    # a day's code is valid until the next daily reset after its attendance date
+    return datetime.combine(
+        attendance_date + timedelta(days=1), time(hour=RESET_HOUR), tzinfo=CLAN_TZ
+    )
+
+
+def get_or_create_todays_code(db: Session, clan_id: int) -> AttendanceCode:
+    today = datetime.now(CLAN_TZ).date()
+    stmt = select(AttendanceCode).where(
+        AttendanceCode.clan_id == clan_id,
+        AttendanceCode.attendance_date == today,
+    )
+    code = db.execute(stmt).scalar_one_or_none()
+    if code is not None:
+        return code
+
+    code = AttendanceCode(
+        clan_id=clan_id,
+        code=generate_code(),
+        attendance_date=today,
+        expires_at=expiry_for(today),
+    )
+    db.add(code)
+    try:
+        db.commit()
+    except IntegrityError:
+        # another admin created today's code at the same moment; use theirs
+        db.rollback()
+        code = db.execute(stmt).scalar_one()
+    return code
 
 TEMPLATES_DIR = Path(__file__).parent / "templates"
 templates = Jinja2Templates(directory=TEMPLATES_DIR)
@@ -54,11 +99,16 @@ def home(request: Request, user: User | None = Depends(get_current_user)):
 
 
 @app.get("/admin", include_in_schema=False)
-def admin(request: Request, user: User = Depends(require_admin)):
+def admin(
+    request: Request,
+    user: User = Depends(require_admin),
+    db: Session = Depends(get_db),
+):
+    code = get_or_create_todays_code(db, user.clan_id)
     return templates.TemplateResponse(
         request=request,
         name="admin.html",
-        context={"user": user},
+        context={"user": user, "code": code},
     )
 
 
