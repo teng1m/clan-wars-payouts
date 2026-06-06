@@ -3,13 +3,15 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import Depends, FastAPI
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy import select
 from sqlalchemy.orm import Session
+from urllib.parse import urlencode
 
 from app.db import engine, get_db
 from app.models import Base, User
+from app.config import BASE_URL, WG_APPLICATION_ID
 
 
 @asynccontextmanager
@@ -37,7 +39,28 @@ def list_users(db: Session = Depends(get_db)):
         for u in users
     ]
     
-# @app.get("/login")
+@app.get("/auth/callback")
+def auth_callback(nickname, account_id, db: Session = Depends(get_db)) -> RedirectResponse:
+    user = User(
+        wg_account_id=account_id,
+        nickname=nickname
+    )
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+    
+    return FileResponse(STATIC_DIR / "success.html")
+    # return RedirectResponse(BASE_URL, status_code=302)
+    
+    
+    
+@app.get("/login")
+def login() -> RedirectResponse:
+    args = {'redirect_uri': f'{BASE_URL}/auth/callback', 'application_id': WG_APPLICATION_ID}
+    url = f"https://api.worldoftanks.com/wot/auth/login/?{urlencode(args)}"
+    
+    return RedirectResponse(url, status_code=302)
+    
 
 
 @app.get("/debug/seed")

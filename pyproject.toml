@@ -5,6 +5,7 @@ description = "WoT clan wars attendance and weekly gold/bonds payout tracker"
 requires-python = ">=3.12"
 dependencies = [
     "fastapi",
+    "python-dotenv>=1.2.2",
     "sqlalchemy>=2.0.50",
     "uvicorn[standard]",
 ]
