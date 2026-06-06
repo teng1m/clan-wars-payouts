@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from sqlalchemy import BigInteger, CheckConstraint, DateTime, ForeignKey, String, func
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 
 class Base(DeclarativeBase):
@@ -31,6 +31,7 @@ class User(Base):
     nickname: Mapped[str] = mapped_column(String(64))
     clan_id: Mapped[int | None] = mapped_column(ForeignKey("clans.id"), nullable=True)
     clan_role: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    clan: Mapped["Clan | None"] = relationship()
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )
