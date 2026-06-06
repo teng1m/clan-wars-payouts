@@ -12,14 +12,27 @@
 
             {% if user %}
             <p>Hello, <strong>{{ user.nickname }}</strong>.</p>
+            <p>Today is <span id="today"></span>.</p>
+
+            <form action="/attendance/enter" method="post">
+                <label>
+                    Today's code:
+                    <input type="text" name="code" maxlength="6" required autocomplete="off" />
+                </label>
+                <button type="submit">Submit</button>
+            </form>
+
             <form action="/logout" method="post">
                 <button type="submit">Log out</button>
             </form>
+
+            <script>
+                const today = document.getElementById("today");
+                if (today) today.textContent = new Date().toLocaleDateString();
+            </script>
             {% else %}
             <p><a href="/login">Click to log in with Wargaming</a></p>
             {% endif %}
-
-            <p id="js-check">If you see this, JS hasn't loaded yet.</p>
         </main>
         <script src="/static/app.js"></script>
     </body>
