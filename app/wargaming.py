@@ -11,6 +11,30 @@ from .config import WG_APPLICATION_ID
 BASE_URL = "https://api.worldoftanks.com"
 
 
+def verify_access_token(access_token: str) -> int | None:
+    """Verify a login callback's access_token with WG and return the account_id
+    it genuinely belongs to, or None if the token is invalid.
+
+    Never trust the account_id from the redirect URL — trust the one WG ties to
+    the token. prolongate rejects a token WG didn't issue, so a successful call
+    proves ownership; we use it purely as a verification probe and discard the
+    refreshed token it returns.
+
+    Endpoint: POST {BASE_URL}/wot/auth/prolongate/
+    Params:   application_id, access_token
+    Response: {"status": "ok", "data": {"account_id": ..., "access_token": ..., "expires_at": ...}}
+    """
+    resp = httpx.post(
+        f"{BASE_URL}/wot/auth/prolongate/",
+        data={"application_id": WG_APPLICATION_ID, "access_token": access_token},
+    )
+    resp.raise_for_status()
+    payload = resp.json()
+    if payload.get("status") != "ok":
+        return None
+    return payload["data"]["account_id"]
+
+
 def get_clan_membership(account_id: int) -> dict | None:
     """Return {"clan_id": int, "role": str} for the given account, or None
     if the player is not currently in a clan.

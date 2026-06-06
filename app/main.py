@@ -25,7 +25,7 @@ from .deps import (
     require_user,
 )
 from .models import Attendance, AttendanceCode, Base, Clan, User
-from .wargaming import get_clan_info, get_clan_membership
+from .wargaming import get_clan_info, get_clan_membership, verify_access_token
 
 RESET_HOUR = 7
 CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
@@ -194,7 +194,22 @@ def list_users(db: Session = Depends(get_db)):
 
 
 @app.get("/auth/callback")
-def auth_callback(nickname, account_id, request: Request, db: Session = Depends(get_db)) -> RedirectResponse:
+def auth_callback(
+    request: Request,
+    status: str = "",
+    access_token: str = "",
+    nickname: str = "",
+    db: Session = Depends(get_db),
+) -> RedirectResponse:
+    # never trust account_id from the URL: verify the token with WG and use the
+    # account_id WG ties to it. status != ok or a bad token means reject.
+    if status != "ok" or not access_token:
+        return RedirectResponse("/", status_code=302)
+
+    account_id = verify_access_token(access_token)
+    if account_id is None:
+        return RedirectResponse("/", status_code=302)
+
     existing = db.execute(select(User).where(User.wg_account_id == account_id)).scalar_one_or_none()
 
     if existing is None:
