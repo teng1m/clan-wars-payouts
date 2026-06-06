@@ -6,7 +6,7 @@ for the public clan endpoints we touch.
 
 import httpx
 
-from app.config import WG_APPLICATION_ID
+from .config import WG_APPLICATION_ID
 
 BASE_URL = "https://api.worldoftanks.com"
 

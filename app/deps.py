@@ -5,8 +5,8 @@ from fastapi import Depends, HTTPException, Request
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.db import get_db
-from app.models import Attendance, User
+from .db import get_db
+from .models import Attendance, User
 
 ADMIN_ROLES = {"commander", "executive_officer"}
 CLAN_TZ = ZoneInfo("America/New_York")

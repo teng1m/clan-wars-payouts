@@ -14,9 +14,9 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 from starlette.middleware.sessions import SessionMiddleware
 
-from app.config import BASE_URL, SECRET_KEY, WG_APPLICATION_ID
-from app.db import engine, get_db
-from app.deps import (
+from .config import BASE_URL, SECRET_KEY, WG_APPLICATION_ID
+from .db import engine, get_db
+from .deps import (
     ADMIN_ROLES,
     CLAN_TZ,
     checked_in_today,
@@ -24,8 +24,8 @@ from app.deps import (
     require_admin,
     require_user,
 )
-from app.models import Attendance, AttendanceCode, Base, Clan, User
-from app.wargaming import get_clan_info, get_clan_membership
+from .models import Attendance, AttendanceCode, Base, Clan, User
+from .wargaming import get_clan_info, get_clan_membership
 
 RESET_HOUR = 7
 CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
