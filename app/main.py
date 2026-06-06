@@ -13,7 +13,7 @@ from starlette.middleware.sessions import SessionMiddleware
 
 from app.config import BASE_URL, SECRET_KEY, WG_APPLICATION_ID
 from app.db import engine, get_db
-from app.deps import ADMIN_ROLES, require_admin
+from app.deps import ADMIN_ROLES, get_current_user, require_admin
 from app.models import Base, Clan, User
 from app.wargaming import get_clan_info, get_clan_membership
 
@@ -45,9 +45,7 @@ def forbidden(request: Request, exc: HTTPException):
 
 
 @app.get("/", include_in_schema=False)
-def home(request: Request, db: Session = Depends(get_db)):
-    user_id = request.session.get("user_id")
-    user = db.get(User, user_id) if user_id else None
+def home(request: Request, user: User | None = Depends(get_current_user)):
     return templates.TemplateResponse(
         request=request,
         name="index.html",
