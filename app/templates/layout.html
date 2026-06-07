@@ -8,6 +8,19 @@
         {% block head_extra %}{% endblock %}
     </head>
     <body>
+        <header class="topbar">
+            <a href="/" class="brand">Clan Wars Payouts</a>
+            <nav class="topbar-right">
+                {% if user %}
+                {% if user.clan_role in admin_roles %}
+                <a href="/admin">Admin Panel</a>
+                {% endif %}
+                <form action="/logout" method="post">
+                    <button type="submit">Log out</button>
+                </form>
+                {% endif %}
+            </nav>
+        </header>
         <main>{% block content %}{% endblock %}</main>
     </body>
 </html>

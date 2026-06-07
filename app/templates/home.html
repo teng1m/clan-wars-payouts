@@ -25,15 +25,9 @@
     </label>
     <button type="submit">Submit</button>
 </form>
-{% endif %} {% if user.clan_role in admin_roles %}
-<p><a href="/admin">Go to Admin</a></p>
 {% endif %} {% else %}
 <p>You're not part of a clan!</p>
 {% endif %}
-
-<form action="/logout" method="post">
-    <button type="submit">Log out</button>
-</form>
 {% else %}
 <p><a href="/login">Click to log in with Wargaming</a></p>
 {% endif %} {% endblock %}
