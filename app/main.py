@@ -152,16 +152,17 @@ def payouts_sheet(
 ):
     if week is None:
         return RedirectResponse("/admin", status_code=302)
-    week = monday_of(week)  # defensive: snap any day to that week's Monday
-    days = [week + timedelta(days=i) for i in range(7)]
+    weekstart = monday_of(week)  # defensive: snap any day to that week's Monday
+    days = [weekstart + timedelta(days=i) for i in range(7)]
+    week_end = days[-1]
 
     flat = db.execute(
         select(User.nickname, Attendance.user_id, Attendance.attendance_date)
         .join(User, User.id == Attendance.user_id)
         .where(
             Attendance.clan_id == user.clan_id,
-            Attendance.attendance_date >= week,
-            Attendance.attendance_date < week + timedelta(days=7),
+            Attendance.attendance_date >= weekstart,
+            Attendance.attendance_date < weekstart + timedelta(days=7),
         )
     ).all()
 
@@ -178,7 +179,7 @@ def payouts_sheet(
     return templates.TemplateResponse(
         request=request,
         name="payouts.html",
-        context={"user": user, "week": week, "days": days, "rows": rows},
+        context={"user": user, "weekstart": weekstart, "week_end": week_end, "days": days, "rows": rows},
     )
 
 
