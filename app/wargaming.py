@@ -12,6 +12,10 @@ from .config import WG_APPLICATION_ID
 
 BASE_URL = "https://api.worldoftanks.com"
 
+# cap WG calls so a slow/hung upstream can't pin threadpool slots and
+# starve the rest of the app under partial outages
+_TIMEOUT = 10.0
+
 _current_season: dict | None = None
 _season_fetched_at: float = 0.0
 _SEASON_TTL = 86400  # 24h
@@ -33,6 +37,7 @@ def verify_access_token(access_token: str) -> int | None:
     resp = httpx.post(
         f"{BASE_URL}/wot/auth/prolongate/",
         data={"application_id": WG_APPLICATION_ID, "access_token": access_token},
+        timeout=_TIMEOUT,
     )
     resp.raise_for_status()
     payload = resp.json()
@@ -52,6 +57,7 @@ def get_clan_membership(account_id: int) -> dict | None:
     resp = httpx.get(
         f"{BASE_URL}/wot/clans/accountinfo/",
         params={"application_id": WG_APPLICATION_ID, "account_id": account_id, "fields": "clan.clan_id,role"},
+        timeout=_TIMEOUT,
     )
     resp.raise_for_status()
     data = resp.json()
@@ -71,6 +77,7 @@ def get_clan_info(clan_id: int) -> dict | None:
     resp = httpx.get(
         f"{BASE_URL}/wot/clans/info/",
         params={"application_id": WG_APPLICATION_ID, "clan_id": clan_id, "fields": "tag"},
+        timeout=_TIMEOUT,
     )
     resp.raise_for_status()
     data = resp.json()
@@ -93,6 +100,7 @@ def get_current_season() -> dict | None:
         resp = httpx.get(
             f"{BASE_URL}/wot/globalmap/seasons/",
             params={"application_id": WG_APPLICATION_ID},
+            timeout=_TIMEOUT,
         )
         resp.raise_for_status()
         seasons = resp.json()["data"]
