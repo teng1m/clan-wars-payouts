@@ -71,3 +71,66 @@ main {
 button {
     cursor: pointer;
 }
+
+.month-name {
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    font-size: 0.8rem;
+    font-weight: 700;
+    opacity: 0.55;
+    margin: 1.75rem 0 0.5rem;
+}
+
+.calendar {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    table-layout: fixed;
+    margin-bottom: 1.5rem;
+    font-variant-numeric: tabular-nums;
+}
+
+.calendar th {
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-size: 0.7rem;
+    font-weight: 600;
+    opacity: 0.45;
+    text-align: center;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid color-mix(in srgb, currentColor 12%, transparent);
+}
+
+.calendar td {
+    height: 4.25rem;
+    padding: 0.4rem 0.5rem;
+    vertical-align: top;
+    border-bottom: 1px solid color-mix(in srgb, currentColor 8%, transparent);
+    border-right: 1px solid color-mix(in srgb, currentColor 8%, transparent);
+    position: relative;
+}
+
+.calendar td:first-child {
+    border-left: 1px solid color-mix(in srgb, currentColor 8%, transparent);
+}
+
+
+.calendar td.out .day-num {
+    opacity: 0.3;
+}
+
+.calendar .day-num {
+    font-size: 0.85rem;
+    font-weight: 500;
+    opacity: 0.75;
+    line-height: 1;
+}
+
+.calendar .check {
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    width: 1.75rem;
+    height: 1.75rem;
+    color: mediumseagreen;
+}

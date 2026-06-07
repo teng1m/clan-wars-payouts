@@ -4,11 +4,17 @@ All calls use the app's application_id only — no per-user access token needed
 for the public clan endpoints we touch.
 """
 
+import time
+
 import httpx
 
 from .config import WG_APPLICATION_ID
 
 BASE_URL = "https://api.worldoftanks.com"
+
+_current_season: dict | None = None
+_season_fetched_at: float = 0.0
+_SEASON_TTL = 86400  # 24h
 
 
 def verify_access_token(access_token: str) -> int | None:
@@ -69,3 +75,32 @@ def get_clan_info(clan_id: int) -> dict | None:
     resp.raise_for_status()
     data = resp.json()
     return data["data"][str(clan_id)]
+
+
+def get_current_season() -> dict | None:
+    """Return the currently ACTIVE Global Map season, or — if none is active —
+    the most recently FINISHED one. None only if the API returns no seasons at all.
+
+    Cached in-process for 24h — season bounds change at most a few times a year,
+    so refetching per request would just add latency.
+
+    Endpoint: GET {BASE_URL}/wot/globalmap/seasons/
+    Params:   application_id
+    Response: {"status": "ok", "data": [{"status": "ACTIVE"|"FINISHED", "start": ..., "end": ..., "season_id": ..., ...}]}
+    """
+    global _current_season, _season_fetched_at
+    if _current_season is None or time.time() - _season_fetched_at > _SEASON_TTL:
+        resp = httpx.get(
+            f"{BASE_URL}/wot/globalmap/seasons/",
+            params={"application_id": WG_APPLICATION_ID},
+        )
+        resp.raise_for_status()
+        seasons = resp.json()["data"]
+        active = next((s for s in seasons if s["status"] == "ACTIVE"), None)
+        if active is not None:
+            _current_season = active
+        else:
+            finished = [s for s in seasons if s["status"] == "FINISHED"]
+            _current_season = max(finished, key=lambda s: s["end"], default=None)
+        _season_fetched_at = time.time()
+    return _current_season

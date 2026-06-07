@@ -25,7 +25,42 @@
 </form>
 {% if error %}
 <p class="error">{{ error }}</p>
-{% endif %} {% endif %} {% else %}
+{% endif %} {% endif %}
+
+{% if season %}
+<h2>{{ season.label }} ({{ season.start.strftime("%b %-d") }} – {{ season.end.strftime("%b %-d") }})</h2>
+<p>{{ season.summary }}</p>
+{% for month in season.months %}
+<h3 class="month-name">{{ month.name }}</h3>
+<table class="calendar">
+    <thead>
+        <tr><th>Sun</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th></tr>
+    </thead>
+    <tbody>
+        {% for week in month.weeks %}
+        <tr>
+            {% for cell in week %}
+            {% if cell is none %}
+            <td class="empty"></td>
+            {% else %}
+            <td class="{{ cell.css }}">
+                <span class="day-num">{{ cell.num }}</span>
+                {% if cell.attended %}
+                <svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <polyline points="5,12 10,17 20,7"/>
+                </svg>
+                {% endif %}
+            </td>
+            {% endif %}
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endfor %}
+{% endif %}
+
+{% else %}
 <p>You're not part of a clan!</p>
 {% endif %} {% else %}
 <p><a href="/login">Click to log in with Wargaming</a></p>

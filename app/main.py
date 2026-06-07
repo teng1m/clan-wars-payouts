@@ -1,3 +1,4 @@
+import calendar
 import secrets
 from contextlib import asynccontextmanager
 from datetime import date, datetime, time, timedelta
@@ -27,7 +28,7 @@ from .deps import (
     require_user,
 )
 from .models import Attendance, AttendanceCode, Base, Clan, User
-from .wargaming import get_clan_info, get_clan_membership, verify_access_token
+from .wargaming import get_clan_info, get_clan_membership, get_current_season, verify_access_token
 
 CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
 
@@ -102,12 +103,65 @@ def redirect_to_home(request: Request, exc: HTTPException):
     return RedirectResponse("/", status_code=302)
 
 
+def build_season_view(user: User | None, db: Session) -> dict | None:
+    """Bundle everything the home template needs to render the season calendar:
+    label, bounds, summary line, and the month-by-month grid with each cell
+    pre-tagged (empty / in-season / out-of-season / attended). Returns None when
+    there's nothing to show (anon user, no clan, or WG reports no seasons)."""
+    if user is None or user.clan_id is None:
+        return None
+    season = get_current_season()
+    if season is None:
+        return None
+
+    start = datetime.fromisoformat(season["start"]).date()
+    end = datetime.fromisoformat(season["end"]).date()
+
+    attended_set: set[date] = set(db.execute(
+        select(Attendance.attendance_date).where(
+            Attendance.user_id == user.id,
+            Attendance.clan_id == user.clan_id,
+            Attendance.attendance_date >= start,
+            Attendance.attendance_date <= end,
+        )
+    ).scalars().all())
+
+    cal = calendar.Calendar(firstweekday=6)  # 6 = Sunday
+    months: list[dict] = []
+    y, m = start.year, start.month
+    while (y, m) <= (end.year, end.month):
+        weeks = [[_cell_for(d, m, start, end, attended_set) for d in week]
+                 for week in cal.monthdatescalendar(y, m)]
+        months.append({"name": date(y, m, 1).strftime("%B %Y"), "weeks": weeks})
+        m, y = (1, y + 1) if m == 12 else (m + 1, y)
+
+    n = len(attended_set)
+    return {
+        "label": "Current season" if season["status"] == "ACTIVE" else "Most recent season",
+        "start": start,
+        "end": end,
+        "summary": f"You have attended {n} day{'s' if n != 1 else ''} this season.",
+        "months": months,
+    }
+
+
+def _cell_for(d: date, month: int, start: date, end: date, attended: set[date]) -> dict | None:
+    if d.month != month:
+        return None
+    return {
+        "num": d.day,
+        "css": "" if start <= d <= end else "out",
+        "attended": d in attended,
+    }
+
+
 @app.get("/", include_in_schema=False)
 def home(
     request: Request,
     code: str = "",
     user: User | None = Depends(get_current_user),
     checked_in: bool = Depends(checked_in_today),
+    db: Session = Depends(get_db),
 ):
     return templates.TemplateResponse(
         request=request,
@@ -119,6 +173,7 @@ def home(
             "code": code,
             "error": None,
             "clan_day": current_clan_day(),
+            "season": build_season_view(user, db),
         },
     )
 
