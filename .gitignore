@@ -16,6 +16,7 @@ venv/
 
 # Local DB files
 *.db
+*.db.bak
 *.sqlite
 *.sqlite3
 
