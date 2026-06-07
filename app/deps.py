@@ -18,6 +18,10 @@ def current_clan_day() -> date:
     return (datetime.now(CLAN_TZ) - timedelta(hours=RESET_HOUR)).date()
 
 
+def monday_of(d: date) -> date:
+    return d - timedelta(days=d.weekday())
+
+
 def get_current_user(request: Request, db: Session = Depends(get_db)) -> User | None:
     user_id = request.session.get("user_id")
     return db.get(User, user_id) if user_id else None

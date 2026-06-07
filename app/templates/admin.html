@@ -10,7 +10,21 @@
 <button id="copy-button" onclick="copyText()">Copy</button>
 <span id="toast" style="visibility: hidden">Copied!</span>
 <p>Valid until {{ code.expires_at.strftime("%b %-d, %-I:%M %p %Z").rstrip() }}.</p>
-{% endif %}
+
+<h2>Weekly payouts</h2>
+{% if weeks %}
+<ul>
+    {% for week in weeks %}
+    <li>
+        <a href="/payouts?week={{ week.start.isoformat() }}">
+            Week of {{ week.start.strftime("%-m/%-d") }} &ndash; {{ week.end.strftime("%-m/%-d") }}
+        </a>
+    </li>
+    {% endfor %}
+</ul>
+{% else %}
+<p>No attendance recorded yet.</p>
+{% endif %} {% endif %}
 <p><a href="/">&larr; Back home</a></p>
 
 <script>

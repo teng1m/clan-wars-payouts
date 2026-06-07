@@ -22,6 +22,7 @@ from .deps import (
     checked_in_today,
     current_clan_day,
     get_current_user,
+    monday_of,
     require_admin,
     require_user,
 )
@@ -126,10 +127,58 @@ def admin(
     db: Session = Depends(get_db),
 ):
     code = get_or_create_todays_code(db, user.clan_id)
+
+    dates = db.execute(
+        select(Attendance.attendance_date)
+        .where(Attendance.clan_id == user.clan_id)
+        .distinct()
+    ).scalars().all()
+    mondays = sorted({monday_of(d) for d in dates}, reverse=True)
+    weeks = [{"start": m, "end": m + timedelta(days=6)} for m in mondays]
+
     return templates.TemplateResponse(
         request=request,
         name="admin.html",
-        context={"user": user, "code": code},
+        context={"user": user, "code": code, "weeks": weeks},
+    )
+
+
+@app.get("/payouts", include_in_schema=False)
+def payouts_sheet(
+    request: Request,
+    week: date | None = None,
+    user: User = Depends(require_admin),
+    db: Session = Depends(get_db),
+):
+    if week is None:
+        return RedirectResponse("/admin", status_code=302)
+    week = monday_of(week)  # defensive: snap any day to that week's Monday
+    days = [week + timedelta(days=i) for i in range(7)]
+
+    flat = db.execute(
+        select(User.nickname, Attendance.user_id, Attendance.attendance_date)
+        .join(User, User.id == Attendance.user_id)
+        .where(
+            Attendance.clan_id == user.clan_id,
+            Attendance.attendance_date >= week,
+            Attendance.attendance_date < week + timedelta(days=7),
+        )
+    ).all()
+
+    by_user: dict[int, dict] = {}
+    for nickname, user_id, attendance_date in flat:
+        bucket = by_user.setdefault(user_id, {"nickname": nickname, "days_set": set()})
+        bucket["days_set"].add(attendance_date)
+
+    rows = sorted(
+        by_user.values(),
+        key=lambda r: (-len(r["days_set"]), r["nickname"].lower()),
+    )
+
+    return templates.TemplateResponse(
+        request=request,
+        name="payouts.html",
+        context={"user": user, "week": week, "days": days, "rows": rows},
     )
 
 

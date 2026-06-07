@@ -1,0 +1,81 @@
+/* The 12-column matrix needs more room than the default 40rem */
+body:has(.payouts-table) main {
+    max-width: 64rem;
+}
+
+.warning {
+    background: color-mix(in srgb, #ffb300 18%, transparent);
+    border-left: 4px solid #ffb300;
+    padding: 0.6rem 0.9rem;
+    border-radius: 4px;
+}
+
+.pool {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: center;
+    margin-block: 1rem;
+}
+
+.pool label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.pool input[type="number"] {
+    width: 7rem;
+    padding: 0.3rem 0.5rem;
+    font: inherit;
+}
+
+.table-wrap {
+    overflow-x: auto;
+    margin-block: 1rem;
+}
+
+.payouts-table {
+    border-collapse: collapse;
+    width: 100%;
+    font-variant-numeric: tabular-nums;
+}
+
+.payouts-table th,
+.payouts-table td {
+    padding: 0.45rem 0.7rem;
+    text-align: center;
+    border-bottom: 1px solid color-mix(in srgb, currentColor 15%, transparent);
+    white-space: nowrap;
+}
+
+.payouts-table thead th {
+    font-weight: 600;
+    background: color-mix(in srgb, currentColor 8%, transparent);
+    position: sticky;
+    top: 0;
+}
+
+.payouts-table td.name,
+.payouts-table thead th:first-child {
+    text-align: left;
+    font-weight: 500;
+}
+
+.payouts-table tbody tr:hover {
+    background: color-mix(in srgb, currentColor 6%, transparent);
+}
+
+.payouts-table .check {
+    color: #2ea44f;
+    font-weight: 700;
+}
+
+/* Paid: dim the row and strike its text */
+.payouts-table tr:has(input.paid:checked) {
+    opacity: 0.45;
+}
+
+.payouts-table tr:has(input.paid:checked) td:not(:last-child) {
+    text-decoration: line-through;
+}

@@ -1,0 +1,68 @@
+{% extends "layout.html" %} {% block head_extra %}<link
+    rel="stylesheet"
+    href="/static/payouts.css"
+/>{% endblock %} {% block content %}
+<h1>Payouts for week of {{ week.strftime("%b %-d") }}</h1>
+
+<p class="warning">Don't refresh &mdash; your paid checkboxes aren't saved.</p>
+
+{% if rows %}
+<div class="pool">
+    <span>Pool for the week:</span>
+    <label>Gold <input id="gold" type="number" min="0" value="0" /></label>
+    <label>Bonds <input id="bonds" type="number" min="0" value="0" /></label>
+</div>
+
+<div class="table-wrap">
+    <table class="payouts-table">
+        <thead>
+            <tr>
+                <th>Nickname</th>
+                {% for day in days %}
+                <th>{{ day.strftime("%a") }}</th>
+                {% endfor %}
+                <th>Days</th>
+                <th>Gold</th>
+                <th>Bonds</th>
+                <th>Paid</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in rows %}
+            <tr data-days="{{ row.days_set|length }}">
+                <td class="name">{{ row.nickname }}</td>
+                {% for day in days %}
+                <td>{% if day in row.days_set %}<span class="check">&check;</span>{% endif %}</td>
+                {% endfor %}
+                <td>{{ row.days_set|length }}</td>
+                <td class="gold-cell">0</td>
+                <td class="bonds-cell">0</td>
+                <td><input class="paid" type="checkbox" /></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script>
+    function recompute() {
+        const gold = Number(document.getElementById("gold").value) || 0;
+        const bonds = Number(document.getElementById("bonds").value) || 0;
+        const rows = document.querySelectorAll("tr[data-days]");
+        const totalDays = Array.from(rows).reduce((s, r) => s + Number(r.dataset.days), 0);
+        rows.forEach((r) => {
+            const days = Number(r.dataset.days);
+            const share = totalDays ? days / totalDays : 0;
+            r.querySelector(".gold-cell").textContent = Math.round(gold * share);
+            r.querySelector(".bonds-cell").textContent = Math.round(bonds * share);
+        });
+    }
+    document.getElementById("gold").addEventListener("input", recompute);
+    document.getElementById("bonds").addEventListener("input", recompute);
+</script>
+{% else %}
+<p>No attendance recorded for this week.</p>
+{% endif %}
+
+<p><a href="/admin">&larr; Back to admin</a></p>
+{% endblock %}
