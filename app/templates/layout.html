@@ -9,16 +9,18 @@
     </head>
     <body>
         <header class="topbar">
-            <a href="/" class="brand">Home</a>
-            <nav class="topbar-right">
-                {% if user %} {% if user.clan_role in admin_roles %}
-                <a href="/admin">Admin Panel</a>
-                {% endif %}
-                <form action="/logout" method="post">
-                    <button type="submit">Log out</button>
-                </form>
-                {% endif %}
-            </nav>
+            <div class="topbar-inner">
+                <a href="/" class="brand">Home</a>
+                <nav class="topbar-right">
+                    {% if user %} {% if user.clan_role in admin_roles %}
+                    <a href="/admin">Admin Panel</a>
+                    {% endif %}
+                    <form action="/logout" method="post">
+                        <button type="submit">Log out</button>
+                    </form>
+                    {% endif %}
+                </nav>
+            </div>
         </header>
         <main>{% block content %}{% endblock %}</main>
     </body>
