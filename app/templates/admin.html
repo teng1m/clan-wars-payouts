@@ -4,8 +4,26 @@
 {% else %}
 <h1>Admin Panel</h1>
 <p>Today's attendance code for <strong>[{{ user.clan.tag }}]</strong> members:</p>
-<p><code style="font-size: 2rem; letter-spacing: 0.3rem">{{ code.code }}</code></p>
+<p>
+    <code id="generated-code" style="font-size: 2rem; letter-spacing: 0.3rem">{{ code.code }}</code>
+</p>
+<button id="copy-button" onclick="copyText()">Copy</button>
+<span id="toast" style="visibility: hidden; margin-left: 8px">Copied!</span>
 <p>Valid until {{ code.expires_at.strftime("%b %-d, %-I:%M %p %Z").rstrip() }}.</p>
 {% endif %}
 <p><a href="/">&larr; Back home</a></p>
+
+<script>
+    function copyText() {
+        const text = document.getElementById("generated-code").innerText;
+        navigator.clipboard.writeText(text);
+
+        const toast = document.getElementById("toast");
+        toast.style.visibility = "visible";
+
+        setTimeout(() => {
+            toast.style.visibility = "hidden";
+        }, 800);
+    }
+</script>
 {% endblock %}
