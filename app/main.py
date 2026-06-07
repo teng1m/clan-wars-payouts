@@ -23,12 +23,14 @@ from .deps import (
     checked_in_today,
     current_clan_day,
     get_current_user,
+    mark_session_synced,
     monday_of,
     require_admin,
     require_user,
+    sync_clan_membership,
 )
-from .models import Attendance, AttendanceCode, Base, Clan, User
-from .wargaming import get_clan_info, get_clan_membership, get_current_season, verify_access_token
+from .models import Attendance, AttendanceCode, Base, User
+from .wargaming import get_current_season, verify_access_token
 
 CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
 
@@ -328,27 +330,12 @@ def auth_callback(
         existing.nickname = nickname
         user = existing
 
-    membership = get_clan_membership(account_id)
-    if membership is None:
-        user.clan_id = None
-        user.clan_role = None
-    else:
-        clan = db.execute(select(Clan).where(Clan.wg_clan_id == membership["clan_id"])).scalar_one_or_none()
-
-        if clan is None:
-            clan_info = get_clan_info(membership["clan_id"])
-            new_clan = Clan(wg_clan_id=membership["clan_id"], tag=clan_info["tag"])
-            db.add(new_clan)
-            db.flush()
-            clan = new_clan
-
-        user.clan_id = clan.id
-        user.clan_role = membership["role"]
-
+    sync_clan_membership(user, db)
     db.commit()
     db.refresh(user)
 
     request.session["user_id"] = user.id
+    mark_session_synced(request)
 
     return RedirectResponse(BASE_URL, status_code=302)
 
