@@ -3,10 +3,6 @@
     color-scheme: light dark;
 }
 
-main {
-    overflow-anchor: none;
-}
-
 body {
     margin: 0;
     display: grid;

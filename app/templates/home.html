@@ -2,14 +2,12 @@
 <h1>Clan Wars Payouts</h1>
 
 {% if user %}
-<p>Hello, <strong>{{ user.nickname }}</strong>.</p>
+<p>
+    Hello, <strong>{{ user.nickname }}</strong>{% if user.clan %} from
+    <strong>[{{ user.clan.tag }}]</strong>{% endif %}.
+</p>
 <p>Today is <span id="today"></span>.</p>
-{% if user.clan %}
-<p>You're a member of <strong>[{{ user.clan.tag }}]</strong> {{ user.clan.name }}.</p>
-
-{% if user.clan_role in admin_roles %}
-<p><a href="/admin">Go to Admin</a></p>
-{% endif %} {% if checked_in %}
+{% if user.clan %} {% if checked_in %}
 <p>You've attended clan wars today. Thanks for playing!</p>
 {% else %} {% if error %}
 <p class="error">{{ error }}</p>
@@ -28,6 +26,8 @@
     </label>
     <button type="submit">Submit</button>
 </form>
+{% endif %} {% if user.clan_role in admin_roles %}
+<p><a href="/admin">Go to Admin</a></p>
 {% endif %} {% else %}
 <p>You're not part of a clan!</p>
 {% endif %}
