@@ -311,17 +311,18 @@ def auth_callback(
     request: Request,
     status: str = "",
     access_token: str = "",
-    nickname: str = "",
     db: Session = Depends(get_db),
 ) -> RedirectResponse:
-    # never trust account_id from the URL: verify the token with WG and use the
-    # account_id WG ties to it. status != ok or a bad token means reject.
+    # never trust account_id (or nickname) from the URL: both are forgeable.
+    # verify the token with WG to get the real account_id, then fetch the
+    # nickname WG actually has on file for it.
     if status != "ok" or not access_token:
         return RedirectResponse("/", status_code=302)
 
-    account_id = verify_access_token(access_token)
-    if account_id is None:
+    verified = verify_access_token(access_token)
+    if verified is None:
         return RedirectResponse("/", status_code=302)
+    account_id, nickname = verified
 
     existing = db.execute(select(User).where(User.wg_account_id == account_id)).scalar_one_or_none()
 

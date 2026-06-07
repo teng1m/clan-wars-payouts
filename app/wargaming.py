@@ -19,18 +19,18 @@ _season_fetched_at: float = 0.0
 _SEASON_TTL = 86400  # 24h
 
 
-def verify_access_token(access_token: str) -> int | None:
-    """Verify a login callback's access_token with WG and return the account_id
-    it genuinely belongs to, or None if the token is invalid.
+def verify_access_token(access_token: str) -> tuple[int, str] | None:
+    """Verify a login callback's access_token with WG and return the
+    (account_id, nickname) pair WG ties to it, or None if the token is invalid.
 
-    Never trust the account_id from the redirect URL — trust the one WG ties to
-    the token. prolongate rejects a token WG didn't issue, so a successful call
-    proves ownership; we use it purely as a verification probe and discard the
-    refreshed token it returns.
+    Never trust the account_id or nickname from the redirect URL — both are
+    forgeable. prolongate rejects a token WG didn't issue, so a successful
+    call proves ownership; we then look up the canonical nickname via
+    account/info so a crafted ?nickname= can't set someone's display name.
 
-    Endpoint: POST {BASE_URL}/wot/auth/prolongate/
-    Params:   application_id, access_token
-    Response: {"status": "ok", "data": {"account_id": ..., "access_token": ..., "expires_at": ...}}
+    Endpoints:
+      POST {BASE_URL}/wot/auth/prolongate/   — verify token, get account_id
+      GET  {BASE_URL}/wot/account/info/      — fetch the nickname WG has on file
     """
     resp = _client.post(
         "/wot/auth/prolongate/",
@@ -40,7 +40,15 @@ def verify_access_token(access_token: str) -> int | None:
     payload = resp.json()
     if payload.get("status") != "ok":
         return None
-    return payload["data"]["account_id"]
+    account_id = payload["data"]["account_id"]
+
+    info = _client.get(
+        "/wot/account/info/",
+        params={"application_id": WG_APPLICATION_ID, "account_id": account_id, "fields": "nickname"},
+    )
+    info.raise_for_status()
+    nickname = info.json()["data"][str(account_id)]["nickname"]
+    return account_id, nickname
 
 
 def get_clan_membership(account_id: int) -> dict | None:
