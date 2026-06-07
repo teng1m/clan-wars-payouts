@@ -1,7 +1,4 @@
-{% extends "layout.html" %} {% block content %} {% if forbidden %}
-<h1>Forbidden</h1>
-<p>{{ forbidden }}</p>
-{% else %}
+{% extends "layout.html" %} {% block content %}
 <h1>Admin Panel</h1>
 <p>Today's attendance code for <strong>[{{ user.clan.tag }}]</strong> members:</p>
 <p>
@@ -24,7 +21,7 @@
 </ul>
 {% else %}
 <p>No attendance recorded yet.</p>
-{% endif %} {% endif %}
+{% endif %}
 <p><a href="/">&larr; Back home</a></p>
 
 <script>

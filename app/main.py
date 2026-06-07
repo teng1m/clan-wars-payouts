@@ -95,14 +95,11 @@ STATIC_DIR = Path(__file__).parent / "static"
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 
+# anything that would be a 403/404 (forbidden page, unknown URL) just goes home
 @app.exception_handler(403)
-def forbidden(request: Request, exc: HTTPException):
-    return templates.TemplateResponse(
-        request=request,
-        name="admin.html",
-        context={"forbidden": exc.detail},
-        status_code=403,
-    )
+@app.exception_handler(404)
+def redirect_to_home(request: Request, exc: HTTPException):
+    return RedirectResponse("/", status_code=302)
 
 
 @app.get("/", include_in_schema=False)
