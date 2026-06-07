@@ -1,15 +1,12 @@
-from pathlib import Path
-
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
 
-PROJECT_ROOT = Path(__file__).parent.parent
-DATABASE_URL = f"sqlite:///{PROJECT_ROOT / 'clan_wars.db'}"
+from .config import DATABASE_URL
 
-engine = create_engine(
-    DATABASE_URL,
-    connect_args={"check_same_thread": False},
-)
+# check_same_thread is a sqlite-only knob; postgres connections are per-thread already.
+connect_args = {"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else {}
+
+engine = create_engine(DATABASE_URL, connect_args=connect_args)
 
 SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
 
