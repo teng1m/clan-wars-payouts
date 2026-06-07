@@ -9,6 +9,9 @@ from fastapi import Depends, FastAPI, Form, HTTPException, Request
 from fastapi.responses import FileResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from slowapi import Limiter
+from slowapi.errors import RateLimitExceeded
+from slowapi.util import get_remote_address
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
@@ -81,18 +84,31 @@ async def lifespan(app: FastAPI):
     yield
 
 
+limiter = Limiter(key_func=get_remote_address)
+
 app = FastAPI(
     lifespan=lifespan,
     docs_url=None,
     redoc_url=None,
     openapi_url=None,
 )
+app.state.limiter = limiter
 app.add_middleware(
     SessionMiddleware,
     secret_key=SECRET_KEY,
     https_only=SECURE_COOKIES,
     same_site="lax",
 )
+
+
+@app.exception_handler(RateLimitExceeded)
+def slow_down(request: Request, exc: RateLimitExceeded):
+    return templates.TemplateResponse(
+        request=request,
+        name="slow_down.html",
+        context={"user": None, "admin_roles": ADMIN_ROLES},
+        status_code=429,
+    )
 
 STATIC_DIR = Path(__file__).parent / "static"
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
@@ -245,6 +261,7 @@ def payouts_sheet(
 
 
 @app.post("/", include_in_schema=False)
+@limiter.limit("10/minute")
 def check_in(
     request: Request,
     code: str = Form(...),
@@ -307,6 +324,7 @@ def logout(request: Request) -> RedirectResponse:
 
 
 @app.get("/auth/callback")
+@limiter.limit("10/minute")
 def auth_callback(
     request: Request,
     status: str = "",
@@ -344,7 +362,8 @@ def auth_callback(
 
 
 @app.get("/login")
-def login() -> RedirectResponse:
+@limiter.limit("10/minute")
+def login(request: Request) -> RedirectResponse:
     args = {"redirect_uri": f"{BASE_URL}/auth/callback", "application_id": WG_APPLICATION_ID}
     url = f"https://api.worldoftanks.com/wot/auth/login/?{urlencode(args)}"
 
