@@ -26,6 +26,9 @@
 {% if error %}
 <p class="error">{{ error }}</p>
 {% endif %} {% endif %}
+{% else %}
+<p>You're not part of a clan!</p>
+{% endif %}
 
 {% if season %}
 <h2>{{ season.label }} ({{ season.start.strftime("%b %-d") }} – {{ season.end.strftime("%b %-d") }})</h2>
@@ -58,10 +61,6 @@
     </tbody>
 </table>
 {% endfor %}
-{% endif %}
-
-{% else %}
-<p>You're not part of a clan!</p>
 {% endif %} {% else %}
 <p><a href="/login">Click to log in with Wargaming</a></p>
 {% endif %} {% endblock %}

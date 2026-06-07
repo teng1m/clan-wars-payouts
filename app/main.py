@@ -108,9 +108,9 @@ def redirect_to_home(request: Request, exc: HTTPException):
 def build_season_view(user: User | None, db: Session) -> dict | None:
     """Bundle everything the home template needs to render the season calendar:
     label, bounds, summary line, and the month-by-month grid with each cell
-    pre-tagged (empty / in-season / out-of-season / attended). Returns None when
-    there's nothing to show (anon user, no clan, or WG reports no seasons)."""
-    if user is None or user.clan_id is None:
+    pre-tagged (empty / in-season / out-of-season / attended). Returns None
+    only for anon users or when WG reports no seasons."""
+    if user is None:
         return None
     season = get_current_season()
     if season is None:
@@ -119,10 +119,11 @@ def build_season_view(user: User | None, db: Session) -> dict | None:
     start = datetime.fromisoformat(season["start"]).date()
     end = datetime.fromisoformat(season["end"]).date()
 
+    # not filtered by clan_id: a player who attended under a prior clan should
+    # still see their history this season after leaving or switching clans
     attended_set: set[date] = set(db.execute(
         select(Attendance.attendance_date).where(
             Attendance.user_id == user.id,
-            Attendance.clan_id == user.clan_id,
             Attendance.attendance_date >= start,
             Attendance.attendance_date <= end,
         )
@@ -293,6 +294,7 @@ def check_in(
             "code": submitted,
             "error": error,
             "clan_day": today,
+            "season": build_season_view(user, db),
         },
         status_code=400,
     )
