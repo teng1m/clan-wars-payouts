@@ -14,3 +14,7 @@ main {
     max-width: 40rem;
     padding: 2rem;
 }
+
+button {
+    cursor: pointer;
+}
