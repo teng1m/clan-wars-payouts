@@ -23,7 +23,6 @@ class Clan(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     wg_clan_id: Mapped[int] = mapped_column(BigInteger, unique=True, index=True)
     tag: Mapped[str] = mapped_column(String(8))
-    name: Mapped[str] = mapped_column(String(128))
 
 
 class User(Base):

@@ -64,7 +64,7 @@ def get_clan_info(clan_id: int) -> dict | None:
     """
     resp = httpx.get(
         f"{BASE_URL}/wot/clans/info/",
-        params={"application_id": WG_APPLICATION_ID, "clan_id": clan_id, "fields": "tag,name"},
+        params={"application_id": WG_APPLICATION_ID, "clan_id": clan_id, "fields": "tag"},
     )
     resp.raise_for_status()
     data = resp.json()

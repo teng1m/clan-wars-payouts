@@ -226,7 +226,7 @@ def auth_callback(
 
         if clan is None:
             clan_info = get_clan_info(membership["clan_id"])
-            new_clan = Clan(wg_clan_id=membership["clan_id"], tag=clan_info["tag"], name=clan_info["name"])
+            new_clan = Clan(wg_clan_id=membership["clan_id"], tag=clan_info["tag"])
             db.add(new_clan)
             db.flush()
             clan = new_clan
