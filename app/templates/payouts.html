@@ -53,8 +53,8 @@
         rows.forEach((r) => {
             const days = Number(r.dataset.days);
             const share = totalDays ? days / totalDays : 0;
-            r.querySelector(".gold-cell").textContent = Math.round(gold * share);
-            r.querySelector(".bonds-cell").textContent = Math.round(bonds * share);
+            r.querySelector(".gold-cell").textContent = Math.floor(gold * share);
+            r.querySelector(".bonds-cell").textContent = Math.floor(bonds * share);
         });
     }
     document.getElementById("gold").addEventListener("input", recompute);
