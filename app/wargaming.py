@@ -10,11 +10,9 @@ import httpx
 
 from .config import WG_APPLICATION_ID
 
-BASE_URL = "https://api.worldoftanks.com"
-
-# cap WG calls so a slow/hung upstream can't pin threadpool slots and
-# starve the rest of the app under partial outages
-_TIMEOUT = 10.0
+# default timeout caps every WG call so a slow/hung upstream can't pin
+# threadpool slots and starve the rest of the app under partial outages
+_client = httpx.Client(base_url="https://api.worldoftanks.com", timeout=10.0)
 
 _current_season: dict | None = None
 _season_fetched_at: float = 0.0
@@ -34,10 +32,9 @@ def verify_access_token(access_token: str) -> int | None:
     Params:   application_id, access_token
     Response: {"status": "ok", "data": {"account_id": ..., "access_token": ..., "expires_at": ...}}
     """
-    resp = httpx.post(
-        f"{BASE_URL}/wot/auth/prolongate/",
+    resp = _client.post(
+        "/wot/auth/prolongate/",
         data={"application_id": WG_APPLICATION_ID, "access_token": access_token},
-        timeout=_TIMEOUT,
     )
     resp.raise_for_status()
     payload = resp.json()
@@ -54,10 +51,9 @@ def get_clan_membership(account_id: int) -> dict | None:
     Params:   application_id, account_id, fields=clan_id,role
     Response: {"status": "ok", "data": {"<account_id>": {"clan_id": ..., "role": ...} | null}}
     """
-    resp = httpx.get(
-        f"{BASE_URL}/wot/clans/accountinfo/",
+    resp = _client.get(
+        "/wot/clans/accountinfo/",
         params={"application_id": WG_APPLICATION_ID, "account_id": account_id, "fields": "clan.clan_id,role"},
-        timeout=_TIMEOUT,
     )
     resp.raise_for_status()
     data = resp.json()
@@ -74,10 +70,9 @@ def get_clan_info(clan_id: int) -> dict | None:
     Params:   application_id, clan_id
     Response: {"status": "ok", "data": {"<clan_id>": {...clan fields...} | null}}
     """
-    resp = httpx.get(
-        f"{BASE_URL}/wot/clans/info/",
+    resp = _client.get(
+        "/wot/clans/info/",
         params={"application_id": WG_APPLICATION_ID, "clan_id": clan_id, "fields": "tag"},
-        timeout=_TIMEOUT,
     )
     resp.raise_for_status()
     data = resp.json()
@@ -97,10 +92,9 @@ def get_current_season() -> dict | None:
     """
     global _current_season, _season_fetched_at
     if _current_season is None or time.time() - _season_fetched_at > _SEASON_TTL:
-        resp = httpx.get(
-            f"{BASE_URL}/wot/globalmap/seasons/",
+        resp = _client.get(
+            "/wot/globalmap/seasons/",
             params={"application_id": WG_APPLICATION_ID},
-            timeout=_TIMEOUT,
         )
         resp.raise_for_status()
         seasons = resp.json()["data"]
