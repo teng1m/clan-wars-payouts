@@ -18,7 +18,9 @@ from .db import engine, get_db
 from .deps import (
     ADMIN_ROLES,
     CLAN_TZ,
+    RESET_HOUR,
     checked_in_today,
+    current_clan_day,
     get_current_user,
     require_admin,
     require_user,
@@ -26,7 +28,6 @@ from .deps import (
 from .models import Attendance, AttendanceCode, Base, Clan, User
 from .wargaming import get_clan_info, get_clan_membership, verify_access_token
 
-RESET_HOUR = 7
 CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
 
 
@@ -40,7 +41,7 @@ def expiry_for(attendance_date: date) -> datetime:
 
 
 def get_or_create_todays_code(db: Session, clan_id: int) -> AttendanceCode:
-    today = datetime.now(CLAN_TZ).date()
+    today = current_clan_day()
     stmt = select(AttendanceCode).where(
         AttendanceCode.clan_id == clan_id,
         AttendanceCode.attendance_date == today,
@@ -113,6 +114,7 @@ def home(
             "checked_in": checked_in,
             "code": code,
             "error": None,
+            "clan_day": current_clan_day(),
         },
     )
 
@@ -139,7 +141,7 @@ def check_in(
     db: Session = Depends(get_db),
 ):
     submitted = code.strip().upper()
-    today = datetime.now(CLAN_TZ).date()
+    today = current_clan_day()
 
     error = None
     if user.clan_id is None:
@@ -180,6 +182,7 @@ def check_in(
             "checked_in": False,
             "code": submitted,
             "error": error,
+            "clan_day": today,
         },
         status_code=400,
     )

@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date, datetime, timedelta
 from zoneinfo import ZoneInfo
 
 from fastapi import Depends, HTTPException, Request
@@ -10,6 +10,12 @@ from .models import Attendance, User
 
 ADMIN_ROLES = {"commander", "executive_officer"}
 CLAN_TZ = ZoneInfo("America/New_York")
+RESET_HOUR = 7  # the clan-wars day rolls over at 7am clan time, not midnight
+
+
+def current_clan_day() -> date:
+    # shift back by the reset hour so the date only advances at 7am clan time
+    return (datetime.now(CLAN_TZ) - timedelta(hours=RESET_HOUR)).date()
 
 
 def get_current_user(request: Request, db: Session = Depends(get_db)) -> User | None:
@@ -35,7 +41,7 @@ def checked_in_today(
 ) -> bool:
     if user is None or user.clan_id is None:
         return False
-    today = datetime.now(CLAN_TZ).date()
+    today = current_clan_day()
     row = db.execute(
         select(Attendance).where(
             Attendance.user_id == user.id,

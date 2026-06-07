@@ -6,15 +6,14 @@
     Hello, <strong>{{ user.nickname }}</strong>{% if user.clan %} from
     <strong>[{{ user.clan.tag }}]</strong>{% endif %}.
 </p>
-<p>Today is <span id="today"></span>.</p>
 {% if user.clan %} {% if checked_in %}
-<p>You've attended clan wars today. Thanks for playing!</p>
+<p>You've checked in for {{ clan_day.strftime("%A, %b %-d") }}. Thanks for playing!</p>
 {% else %} {% if error %}
 <p class="error">{{ error }}</p>
 {% endif %}
 <form action="/" method="post">
     <label>
-        Today's code:
+        Enter the code for {{ clan_day.strftime("%A, %b %-d") }}:
         <input
             type="text"
             name="code"
@@ -35,11 +34,6 @@
 <form action="/logout" method="post">
     <button type="submit">Log out</button>
 </form>
-
-<script>
-    const today = document.getElementById("today");
-    if (today) today.textContent = new Date().toLocaleDateString();
-</script>
 {% else %}
 <p><a href="/login">Click to log in with Wargaming</a></p>
 {% endif %} {% endblock %}
