@@ -49,11 +49,17 @@ body {
 }
 
 main {
-    width: 100%;
-    max-width: 40rem;
-    padding: 2rem;
-    margin-inline: auto;
+    width: min(64rem, 100% - 2.5rem);
+    padding-left: 2rem;
+    padding-right: 2rem;
+    padding-bottom: 1rem;
+    /* padding: 2rem; */
+    margin: 2rem auto;
     box-sizing: border-box;
+    background: color-mix(in srgb, currentColor 6%, transparent);
+    border: 1px solid color-mix(in srgb, currentColor 15%, transparent);
+    border-radius: 0.75rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
 button {

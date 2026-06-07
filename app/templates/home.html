@@ -8,9 +8,7 @@
 </p>
 {% if user.clan %} {% if checked_in %}
 <p>You've checked in for {{ clan_day.strftime("%A, %b %-d") }}. Thanks for playing!</p>
-{% else %} {% if error %}
-<p class="error">{{ error }}</p>
-{% endif %}
+{% else %}
 <form action="/" method="post">
     <label>
         Enter the code for {{ clan_day.strftime("%A, %b %-d") }}:
@@ -25,9 +23,10 @@
     </label>
     <button type="submit">Submit</button>
 </form>
-{% endif %} {% else %}
+{% if error %}
+<p class="error">{{ error }}</p>
+{% endif %} {% endif %} {% else %}
 <p>You're not part of a clan!</p>
-{% endif %}
-{% else %}
+{% endif %} {% else %}
 <p><a href="/login">Click to log in with Wargaming</a></p>
 {% endif %} {% endblock %}
