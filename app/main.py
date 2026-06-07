@@ -106,7 +106,7 @@ def home(
 ):
     return templates.TemplateResponse(
         request=request,
-        name="index.html",
+        name="home.html",
         context={
             "user": user,
             "admin_roles": ADMIN_ROLES,
@@ -173,7 +173,7 @@ def check_in(
     # bad submission: nothing was written, so re-render home with the error inline
     return templates.TemplateResponse(
         request=request,
-        name="index.html",
+        name="home.html",
         context={
             "user": user,
             "admin_roles": ADMIN_ROLES,
