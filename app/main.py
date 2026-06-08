@@ -17,7 +17,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 from starlette.middleware.sessions import SessionMiddleware
 
-from .config import BASE_URL, SECRET_KEY, SECURE_COOKIES, WG_APPLICATION_ID
+from .config import BASE_URL, BRAND_NAME, SECRET_KEY, SECURE_COOKIES, WG_APPLICATION_ID
 from .db import engine, get_db
 from .deps import (
     ADMIN_ROLES,
@@ -76,6 +76,7 @@ def get_or_create_todays_code(db: Session, clan_id: int) -> AttendanceCode:
 TEMPLATES_DIR = Path(__file__).parent / "templates"
 templates = Jinja2Templates(directory=TEMPLATES_DIR)
 templates.env.globals["admin_roles"] = ADMIN_ROLES
+templates.env.globals["brand_name"] = BRAND_NAME
 
 
 @asynccontextmanager
