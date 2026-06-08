@@ -6,7 +6,22 @@
 </p>
 <button id="copy-button" onclick="copyText()">Copy</button>
 <span id="toast" style="visibility: hidden">Copied!</span>
-<p>Valid until {{ code.expires_at.strftime("%b %-d, %-I:%M %p %Z").rstrip() }}.</p>
+<p>
+    Valid until
+    <span id="code-expiry" data-iso="{{ code.expires_at.isoformat() }}">{{ code.expires_at.strftime("%b %-d, 7:00 AM EDT") }}</span>.
+</p>
+<script>
+    (function () {
+        var el = document.getElementById("code-expiry");
+        var d = new Date(el.dataset.iso);
+        if (isNaN(d)) return;
+        el.textContent = new Intl.DateTimeFormat(undefined, {
+            month: "short", day: "numeric",
+            hour: "numeric", minute: "2-digit",
+            timeZoneName: "short",
+        }).format(d);
+    })();
+</script>
 
 <h2>Weekly payouts</h2>
 {% if weeks %}
