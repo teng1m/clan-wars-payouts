@@ -197,6 +197,18 @@ def home(
     )
 
 
+@app.get("/about", include_in_schema=False)
+def about(
+    request: Request,
+    user: User | None = Depends(get_current_user),
+):
+    return templates.TemplateResponse(
+        request=request,
+        name="about.html",
+        context={"user": user},
+    )
+
+
 @app.get("/admin", include_in_schema=False)
 def admin(
     request: Request,
