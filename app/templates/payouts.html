@@ -2,9 +2,12 @@
     rel="stylesheet"
     href="/static/payouts.css?v={{ static_v }}"
 />{% endblock %} {% block content %}
-<h1>Payouts for week of {{ week_start.strftime("%b %-d") }} &ndash; {{ week_end.strftime("%b %-d") }}</h1>
+<h1>
+    Payouts for week of {{ week_start.strftime("%b %-d") }} &ndash; {{ week_end.strftime("%b %-d")
+    }}
+</h1>
 
-<p class="warning">Don't refresh &mdash; your paid checkboxes aren't saved.</p>
+<p class="warning">The checkboxes aren't saved. Refresh carefully.</p>
 
 {% if rows %}
 <div class="pool">
@@ -32,7 +35,9 @@
             <tr data-days="{{ row.days_set|length }}">
                 <td class="name">{{ row.nickname }}</td>
                 {% for day in days %}
-                <td class="day-col">{% if day in row.days_set %}<span class="check">&check;</span>{% endif %}</td>
+                <td class="day-col">
+                    {% if day in row.days_set %}<span class="check">&check;</span>{% endif %}
+                </td>
                 {% endfor %}
                 <td class="day-col">{{ row.days_set|length }}</td>
                 <td class="gold-cell">0</td>
