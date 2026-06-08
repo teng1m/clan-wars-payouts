@@ -1,6 +1,6 @@
 # clan-wars-payouts
 
-WoT clan wars attendance and weekly gold/bonds payout tracker.
+World of Tanks clan wars attendance and weekly gold/bonds payout tracker.
 
 ## Setup
 
