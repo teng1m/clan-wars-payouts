@@ -11,7 +11,7 @@ from .db import get_db
 from .models import Attendance, Clan, User
 from .wargaming import get_clan_info, get_clan_membership
 
-ADMIN_ROLES = {"commander", "executive_officer"}
+ADMIN_ROLES = {"commander", "executive_officer", "personnel_officer"}
 CLAN_TZ = ZoneInfo("America/New_York")
 RESET_HOUR = 7  # the clan-wars day rolls over at 7am clan time, not midnight
 SYNC_TTL = 300  # re-pull clan + role from WG at most once per 5 min per session
