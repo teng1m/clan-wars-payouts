@@ -1,23 +1,26 @@
 {% extends "layout.html" %} {% block content %}
 <h1>Admin Panel</h1>
-<p>Today's attendance code for <strong>[{{ user.clan.tag }}]</strong> members:</p>
 <p>
+    Today's attendance code for <strong>[{{ user.clan.tag }}]</strong> members is valid until
+    <span id="code-expiry" data-iso="{{ code.expires_at.isoformat() }}"
+        >{{ code.expires_at.strftime("%b %-d, 7:00 AM EDT") }}</span
+    >:
+</p>
+<div style="display: flex; align-items: center; gap: 1rem">
     <code id="generated-code" style="font-size: 2rem; letter-spacing: 0.3rem">{{ code.code }}</code>
-</p>
-<button id="copy-button" onclick="copyText()">Copy</button>
-<span id="toast" style="visibility: hidden">Copied!</span>
-<p>
-    Valid until
-    <span id="code-expiry" data-iso="{{ code.expires_at.isoformat() }}">{{ code.expires_at.strftime("%b %-d, 7:00 AM EDT") }}</span>.
-</p>
+    <button id="copy-button" onclick="copyText()">Copy</button>
+    <span id="toast" style="visibility: hidden">Copied!</span>
+</div>
 <script>
     (function () {
         var el = document.getElementById("code-expiry");
         var d = new Date(el.dataset.iso);
         if (isNaN(d)) return;
         el.textContent = new Intl.DateTimeFormat(undefined, {
-            month: "short", day: "numeric",
-            hour: "numeric", minute: "2-digit",
+            month: "short",
+            day: "numeric",
+            hour: "numeric",
+            minute: "2-digit",
             timeZoneName: "short",
         }).format(d);
     })();
