@@ -3,6 +3,13 @@
     color-scheme: light dark;
 }
 
+.site-footer {
+    text-align: center;
+    font-size: 0.75rem;
+    opacity: 0.4;
+    padding: 1rem 2rem 1.5rem;
+}
+
 body {
     margin: 0;
     display: flex;
