@@ -41,7 +41,13 @@
     padding: 0.45rem 0.7rem;
     text-align: center;
     border-bottom: 1px solid color-mix(in srgb, currentColor 15%, transparent);
+    border-right: 1px solid color-mix(in srgb, currentColor 15%, transparent);
     white-space: nowrap;
+}
+
+.payouts-table th:first-child,
+.payouts-table td:first-child {
+    border-left: 1px solid color-mix(in srgb, currentColor 15%, transparent);
 }
 
 .payouts-table thead th {
@@ -49,6 +55,10 @@
     background: color-mix(in srgb, currentColor 8%, transparent);
     position: sticky;
     top: 0;
+}
+
+.payouts-table .day-col {
+    width: 2.4rem;
 }
 
 .payouts-table td.name,

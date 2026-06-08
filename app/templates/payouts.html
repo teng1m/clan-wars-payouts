@@ -9,8 +9,8 @@
 {% if rows %}
 <div class="pool">
     <span>Pool for the week:</span>
-    <label>Gold <input id="gold" type="number" min="0" value="0" /></label>
-    <label>Bonds <input id="bonds" type="number" min="0" value="0" /></label>
+    <label>Gold <input id="gold" type="number" min="0" max="1000000000" value="0" /></label>
+    <label>Bonds <input id="bonds" type="number" min="0" max="1000000000" value="0" /></label>
 </div>
 
 <div class="table-wrap">
@@ -19,9 +19,9 @@
             <tr>
                 <th>Nickname</th>
                 {% for day in days %}
-                <th>{{ day.strftime("%a") }}</th>
+                <th class="day-col">{{ day.strftime("%a") }}</th>
                 {% endfor %}
-                <th>Days</th>
+                <th class="day-col">Days</th>
                 <th>Gold</th>
                 <th>Bonds</th>
                 <th>Paid</th>
@@ -32,9 +32,9 @@
             <tr data-days="{{ row.days_set|length }}">
                 <td class="name">{{ row.nickname }}</td>
                 {% for day in days %}
-                <td>{% if day in row.days_set %}<span class="check">&check;</span>{% endif %}</td>
+                <td class="day-col">{% if day in row.days_set %}<span class="check">&check;</span>{% endif %}</td>
                 {% endfor %}
-                <td>{{ row.days_set|length }}</td>
+                <td class="day-col">{{ row.days_set|length }}</td>
                 <td class="gold-cell">0</td>
                 <td class="bonds-cell">0</td>
                 <td><input class="paid" type="checkbox" /></td>
