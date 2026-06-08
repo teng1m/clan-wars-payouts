@@ -49,6 +49,8 @@
             {% else %}
             <td class="{{ cell.css }}">
                 <span class="day-num">{{ cell.num }}</span>
+                {% if cell.is_start %}<span class="season-marker season-marker--start">Season Start</span>{% endif %}
+                {% if cell.is_end %}<span class="season-marker season-marker--end">Season End</span>{% endif %}
                 {% if cell.attended %}
                 <svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <polyline points="5,12 10,17 20,7"/>

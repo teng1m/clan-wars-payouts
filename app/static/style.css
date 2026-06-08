@@ -145,3 +145,25 @@ button {
     height: 1.75rem;
     color: mediumseagreen;
 }
+
+.season-marker {
+    display: block;
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-top: 0.25rem;
+    padding: 0.1rem 0.3rem;
+    border-radius: 0.25rem;
+    width: fit-content;
+}
+
+.season-marker--start {
+    background: color-mix(in srgb, mediumseagreen 25%, transparent);
+    color: mediumseagreen;
+}
+
+.season-marker--end {
+    background: color-mix(in srgb, steelblue 25%, transparent);
+    color: steelblue;
+}

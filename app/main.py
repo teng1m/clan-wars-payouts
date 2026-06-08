@@ -169,9 +169,16 @@ def build_season_view(user: User | None, db: Session) -> dict | None:
 def _cell_for(d: date, month: int, start: date, end: date, attended: set[date]) -> dict | None:
     if d.month != month:
         return None
+    classes = [] if start <= d <= end else ["out"]
+    if d == start:
+        classes.append("season-start")
+    if d == end:
+        classes.append("season-end")
     return {
         "num": d.day,
-        "css": "" if start <= d <= end else "out",
+        "css": " ".join(classes),
+        "is_start": d == start,
+        "is_end": d == end,
         "attended": d in attended,
     }
 
