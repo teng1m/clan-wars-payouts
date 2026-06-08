@@ -12,8 +12,14 @@
 {% if rows %}
 <div class="pool">
     <span>Pool for the week:</span>
-    <label>Gold <input id="gold" type="number" min="0" max="1000000000" value="0" /></label>
-    <label>Bonds <input id="bonds" type="number" min="0" max="1000000000" value="0" /></label>
+    <label
+        >Gold <img src="/static/gold.png" class="currency-icon" alt="Gold" />
+        <input id="gold" type="number" min="0" max="1000000000" value="0"
+    /></label>
+    <label
+        >Bonds <img src="/static/bonds.png" class="currency-icon" alt="Bonds" />
+        <input id="bonds" type="number" min="0" max="1000000000" value="0"
+    /></label>
 </div>
 
 <div class="table-wrap">
@@ -25,8 +31,8 @@
                 <th class="day-col">{{ day.strftime("%a") }}</th>
                 {% endfor %}
                 <th class="day-col">Days</th>
-                <th>Gold</th>
-                <th>Bonds</th>
+                <th>Gold <img src="/static/gold.png" class="currency-icon" alt="" /></th>
+                <th>Bonds <img src="/static/bonds.png" class="currency-icon" alt="" /></th>
                 <th>Paid</th>
             </tr>
         </thead>

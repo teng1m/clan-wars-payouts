@@ -8,7 +8,7 @@
 .pool {
     display: flex;
     flex-wrap: wrap;
-    gap: 1rem;
+    gap: 2rem;
     align-items: center;
     margin-block: 1rem;
 }
@@ -17,6 +17,13 @@
     display: inline-flex;
     align-items: center;
     gap: 0.4rem;
+}
+
+.currency-icon {
+    width: 1.35rem;
+    height: 1.35rem;
+    object-fit: contain;
+    vertical-align: -0.3rem;
 }
 
 .pool input[type="number"] {
