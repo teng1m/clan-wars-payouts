@@ -1,6 +1,6 @@
 {% extends "layout.html" %} {% block head_extra %}<link
     rel="stylesheet"
-    href="/static/payouts.css"
+    href="/static/payouts.css?v={{ static_v }}"
 />{% endblock %} {% block content %}
 <h1>Payouts for week of {{ week_start.strftime("%b %-d") }} &ndash; {{ week_end.strftime("%b %-d") }}</h1>
 

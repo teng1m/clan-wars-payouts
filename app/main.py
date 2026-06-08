@@ -77,6 +77,7 @@ TEMPLATES_DIR = Path(__file__).parent / "templates"
 templates = Jinja2Templates(directory=TEMPLATES_DIR)
 templates.env.globals["admin_roles"] = ADMIN_ROLES
 templates.env.globals["brand_name"] = BRAND_NAME
+templates.env.globals["static_v"] = int(datetime.now().timestamp())
 
 
 @asynccontextmanager
