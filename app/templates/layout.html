@@ -28,6 +28,12 @@
         <main>{% block content %}{% endblock %}</main>
         <footer class="site-footer">
             <p>{{ brand_name }} is not affiliated with Wargaming.net or World of Tanks.</p>
+            {% if credit_name %}
+            <p class="footer-credit">
+                Created by
+                {% if credit_url %}<a href="{{ credit_url }}" target="_blank" rel="noopener noreferrer">{{ credit_name }}</a>{% else %}{{ credit_name }}{% endif %}.
+            </p>
+            {% endif %}
         </footer>
     </body>
 </html>

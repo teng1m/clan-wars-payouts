@@ -17,7 +17,9 @@ WG_APPLICATION_ID=your_wargaming_application_id
 SECRET_KEY=a_random_string_for_signing_session_cookies
 BASE_URL=http://localhost:8000
 # optional
-BRAND_NAME=clantools.fyi
+BRAND_NAME=Clan Wars Payouts
+CREDIT_NAME=your_handle
+CREDIT_URL=https://tomato.gg/stats/Your_Name-12345/NA
 DATABASE_URL=sqlite:///clan_wars.db
 ```
 

@@ -7,7 +7,11 @@ load_dotenv()
 
 WG_APPLICATION_ID = os.getenv("WG_APPLICATION_ID", "")
 BASE_URL = os.getenv("BASE_URL", "http://localhost:8000").rstrip("/")
-BRAND_NAME = os.getenv("BRAND_NAME", "clantools.fyi")
+BRAND_NAME = os.getenv("BRAND_NAME", "Clan Wars Payouts")
+# optional credit shown in the footer; empty -> nothing renders, so the
+# author's name/link stays out of source and only exists in the deploy env.
+CREDIT_NAME = os.getenv("CREDIT_NAME", "")
+CREDIT_URL = os.getenv("CREDIT_URL", "")
 SECRET_KEY = os.getenv("SECRET_KEY", "")
 
 _PROJECT_ROOT = Path(__file__).parent.parent

@@ -17,7 +17,15 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 from starlette.middleware.sessions import SessionMiddleware
 
-from .config import BASE_URL, BRAND_NAME, SECRET_KEY, SECURE_COOKIES, WG_APPLICATION_ID
+from .config import (
+    BASE_URL,
+    BRAND_NAME,
+    CREDIT_NAME,
+    CREDIT_URL,
+    SECRET_KEY,
+    SECURE_COOKIES,
+    WG_APPLICATION_ID,
+)
 from .db import engine, get_db
 from .deps import (
     ADMIN_ROLES,
@@ -77,6 +85,8 @@ TEMPLATES_DIR = Path(__file__).parent / "templates"
 templates = Jinja2Templates(directory=TEMPLATES_DIR)
 templates.env.globals["admin_roles"] = ADMIN_ROLES
 templates.env.globals["brand_name"] = BRAND_NAME
+templates.env.globals["credit_name"] = CREDIT_NAME
+templates.env.globals["credit_url"] = CREDIT_URL
 templates.env.globals["static_v"] = int(datetime.now().timestamp())
 
 
